@@ -1,9 +1,22 @@
-<script context="module">
+<script context="module" >
 	export const prerender = true;
 </script>
 
-<script>
+<script >
+	import { onMount } from 'svelte';
 	import Counter from '$lib/Counter.svelte';
+	let address;
+	
+
+
+	async function connectWallet(){
+		await  window.aptos.account().then((/** @type {any} */ res) => address = res);
+	     console.log('address: ' + JSON.stringify(address))
+	}
+	
+	onMount(connectWallet)
+
+
 </script>
 
 <svelte:head>
