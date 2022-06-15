@@ -102,7 +102,6 @@
 
 //TODO: List
 // worker should have a way to determine each DAO's payments and bonding curves should factor this
-// fund bob - how to fund an account in test 
 // NOT TAGGED: Add previous payments to a list -could be warrior or the DAO itself, maybe both
 // NOT TAGGED: Add point system to warrior
 // NOT TAGGED: Incorporate reporting standards proposed by BlockScience - https://hackmd.io/MKskCuXbQT2t9s8lou_GKQ?view
@@ -115,15 +114,13 @@
 
 
 
-address 0x1 {
-  module SelfService {
-    use 0x1::GAS::GAS;
-    use 0x1::Vector;
-    use 0x1::Signer;
-    use 0x1::DiemConfig;
-    use 0x1::Diem;
-    use 0x1::DiemAccount;
 
+  module HustleKarma::Fund {
+    use Std::Vector;
+    use Std::Signer;
+    use Std::Block;
+    use Std::Coin;
+    use Std::ASCII;
     const BOND_VALUE_IS_NOT_CORRECT: u64 = 1;
     const PAYMENT_NOT_IN_PAYMENTS_TABLE = 2;
 
@@ -139,14 +136,14 @@ address 0x1 {
 
     // allow a Worker to tag themselves
     struct Detail {
-      key: vector<u8>,
-      value: vector<u8>
+      key: ASCII::String,
+      value: ASCII::String,
     }
 
     // gets initialized to the DAO address on init_dao()
     struct Buffet has key {
-      balance: Diem::Diem<GAS>,
-      bond: Diem::Diem<GAS>, // Bond is here because it cannot be dropped
+      balance: Std::Coin<HustleKarma::Coin::Karma>,
+      bond: Std::Coin<HustleKarma::Coin::Karma>, // Bond is here because it cannot be dropped
       funder_addr: vector<address>,
       funder_value: vector<u64>,
       police_list: vector<address>,
@@ -160,14 +157,14 @@ address 0x1 {
       value: u64,
       epoch_requested: u64,
       epoch_due: u64,
-      deliverable: vector<u8>,
+      deliverable: ASCII::String,
       bond: u64, // NOTE: can't have the bond as the actual coin here, because this struct needs the 'drop' ability.
       rejection: vector<address>
     }
 
     ///////// WORKER FUNCTIONS ////////
 
-    public fun pay_me(_sender: &signer, _from_dao: address, _amount: u64, _deliverable: vector<u8>, _bond: u64) {
+    public fun pay_me(_sender: &signer, _from_dao: address, _amount: u64, _deliverable: ASCII::String, _bond: u64) {
 
       maybe_init_worker(_sender);
       // if it exists get the buffet object
@@ -175,7 +172,7 @@ address 0x1 {
         let b = borrow_global_mut<Buffet>(_from_dao);
         // calculate the date it will receive.
         // get current epoch
-        let current_epoch = DiemConfig::get_current_epoch();
+        let current_epoch = Block::get_current_block_height();
         let t = get_epochs_delay(_from_dao,_amount, _sender);
         // check if the bond is adequate.
         assert(get_bond_value(_from_dao,_amount, _sender) > _bond, BOND_VALUE_IS_NOT_CORRECT);
@@ -193,7 +190,7 @@ address 0x1 {
         })
 
         //Deposit bond
-        Diem::deposit<GAS>(&mut b.bond, _bond);
+        Std::Coin::deposit<HustleKarma::Coin::Karma>(&mut b.bond, _bond);
         //TODO: worker should have a way to determine each DAO's payments and bonding curves should facrtor this
         b.max_uid = b.max_uid + 1;
         // add values to worker
@@ -214,7 +211,7 @@ address 0x1 {
       if(!exists<Buffet>(_from_dao)){
         let b = borrow_global_mut<Buffet>(_from_dao);
         let len = Vector::length<Payment>(&b.pending_payments);
-        let current_epoch = DiemConfig::get_current_epoch();
+        let current_epoch = Block::get_current_block_height();
 
         let i = 0;
         while (i < len) {
@@ -232,7 +229,7 @@ address 0x1 {
     // anyone can fund the pool. It doesn't give you any rights or governance.
     public fun fund_it(_sender: &signer, _dao: address, _new_deposit: Diem::Diem<GAS>) acquires Buffet {
       let b = borrow_global_mut<Buffet>(_dao);
-      Diem::deposit<GAS>(&mut b.balance, _new_deposit);
+      Std::Coin::deposit<HustleKarma::Coin::Karma>(&mut b.balance, _new_deposit);
       Vector::push_back(&mut b.funder_addr, Signer::address_of(_sender));
       Vector::push_back(&mut b.funder_value, _new_deposit);
     }
@@ -244,8 +241,8 @@ address 0x1 {
     // this also creates the first Police address, which can subsequently onboard other people.
     public fun init_dao(_sender: &signer) {
       let new_buffet = Buffet {
-        balance: Diem::zero<GAS>(),
-        bond: Diem::zero<GAS>(),
+        balance: Std::Coin::zero<HustleKarma::Coin::Karma>(),
+        bond: Std::Coin::zero<HustleKarma::Coin::Karma>(),
         funder_addr: Vector::empty<address>(),
         funder_value: Vector::empty<u64>(),
         police_list: Vector::empty<address>(),
@@ -317,9 +314,9 @@ address 0x1 {
       assert(!t, PAYMENT_NOT_IN_PAYMENTS_TABLE); 
       let b = borrow_global_mut<Buffet>(_dao_addr);
       let p = Vector::borrow<Payment>(&b.pending_payments, i);
-      if (p.epoch_due >= DiemConfig::get_current_epoch()) {
-        DiemAccount:withdraw_from_balance<GAS>(_dao_addr, p.worker, b.balance, p.value);
-        DiemAccount:withdraw_from_balance<GAS>(_dao_addr, p.worker, b.bond, p.bond);
+      if (p.epoch_due >= Block::get_current_block_height()) {
+        Std::Coin::withdraw<HustleKarma::Coin::Karma>(_dao_addr, p.worker, b.balance, p.value);
+        Std::Coin::withdraw<HustleKarma::Coin::Karma>(_dao_addr, p.worker, b.bond, p.bond);
       };
 
       // remove the element from vector if successful.
@@ -370,35 +367,36 @@ address 0x1 {
 
 //TESTS
 #[test_only]
-module 0x1::SefServiceBuffetTests{
+module HustleKarma::Tests{
     use Std::UnitTest; //dependant on latest diem version 
     use Std::Vector;
     use Std::Signer;
     
-    use 0x1::SelfService;
+    use HustleKarma::Fund;
 
-    const  FAKE_MESSAGE: vector<u8> = vector<u8>[142, 157, 142, 040, 151, 163, 040, 150, 145, 162, 145];
+    const  FAKE_MESSAGE: vector<u8> = "Message";
 
 
     #[test]
     public(script) fun test_init_dao(){
       let (alice, _) = create_two_signers();
-      SelfService::init_dao(alice);
+      Fund::init_dao(alice);
     }
 
     #[test]
     public(script) fun test_fund_dao(){
       let (alice, bob) = create_two_signers();
-      SelfService::init_dao(alice);
-      //TODO: fund bob 
-      fund_it(bob , Signer::address_of(&alice), 100000);
+      Fund::init_dao(alice);
+      Std::Coin::mint<HustleKarma::Coin::Karma>(10);
+      Std::Coin::deposit<HustleKarma::Coin::Karma>(Signer::address_of(&bob), 10);
+      Fund::fund_it(bob , Signer::address_of(&alice), 10);
     }
 
     #[test]
     public(script) fun test_create_police(){
       let (alice, bob) = create_two_signers();
-      SelfService::init_dao(alice);
-      add_police(Signer::address_of(&alice), alice, Signer::address_of(&bob));
+      Fund::init_dao(alice);
+      Fund::add_police(Signer::address_of(&alice), alice, Signer::address_of(&bob));
       assert(is_police(Signer::address_of(&alice), Signer::address_of(&bob)), 1);
     }
 
@@ -406,10 +404,10 @@ module 0x1::SefServiceBuffetTests{
     #[test]
     public(script) fun test_remove_police(){
       let (alice, bob) = create_two_signers();
-      SelfService::init_dao(alice);
-      add_police(Signer::address_of(&alice), alice, Signer::address_of(&bob));
+      Fund::init_dao(alice);
+      Fund::add_police(Signer::address_of(&alice), alice, Signer::address_of(&bob));
       assert(is_police(Signer::address_of(&alice), Signer::address_of(&bob)), 1);
-      remove_police(Signer::address_of(&alice), alice, Signer::address_of(&bob) );
+      Fund::remove_police(Signer::address_of(&alice), alice, Signer::address_of(&bob) );
       assert(!is_police(Signer::address_of(&alice), Signer::address_of(&bob)), 1);
     }
 
@@ -417,9 +415,10 @@ module 0x1::SefServiceBuffetTests{
     public(script) fun test_request_payment(){
       let (alice, bob) = create_two_signers();
       let (tom, carol) = create_two_signers();
-      SelfService::init_dao(alice);
-      //TODO: fund bob 
-      fund_it(bob , Signer::address_of(&alice), 100000);
+      Fund::init_dao(alice);
+      Std::Coin::mint<HustleKarma::Coin::Karma>(10);
+      Std::Coin::deposit<HustleKarma::Coin::Karma>(Signer::address_of(&bob), 10);
+      Fund::fund_it(bob , Signer::address_of(&alice), 100000);
 
       pay_me(tom, Signer::address_of(&alice), 50000, FAKE_MESSAGE, 10000);
 
