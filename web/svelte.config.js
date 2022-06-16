@@ -8,7 +8,12 @@ const config = {
 		// Override http methods in the Todo forms
 		methodOverride: {
 			allowed: ['PATCH', 'DELETE']
-		}
+		},
+		vite: () => ({
+			build: {
+				target: [ 'es2020' ]
+			}
+		})
 	}
 };
 

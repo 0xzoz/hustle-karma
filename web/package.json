@@ -30,6 +30,7 @@
 	"type": "module",
 	"dependencies": {
 		"@fontsource/fira-mono": "^4.5.0",
+		"aptos": "^1.1.0",
 		"cookie": "^0.4.1"
 	}
 }

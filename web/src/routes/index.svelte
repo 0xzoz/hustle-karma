@@ -3,20 +3,7 @@
 </script>
 
 <script >
-	import { onMount } from 'svelte';
 	import Counter from '$lib/Counter.svelte';
-	let address;
-	
-
-
-	async function connectWallet(){
-		console.log(window.aptos.account())
-		await  window.aptos.account().then((/** @type {any} */ res) => address = res);
-	     console.log('address: ' + JSON.stringify(address))
-	}
-	onMount(connectWallet)
-
-
 </script>
 
 <svelte:head>

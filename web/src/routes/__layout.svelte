@@ -1,6 +1,20 @@
 <script>
+	import { onMount } from 'svelte';
+	import { Types, AptosClient } from 'aptos';
 	import Header from '$lib/header/Header.svelte';
 	import '../app.css';
+	
+	let address;
+	
+
+
+	async function connectWallet(){
+		console.log(window.aptos.account())
+		await  window.aptos.account().then((/** @type {any} */ res) => address = res);
+	     console.log('address: ' + JSON.stringify(address))
+	}
+	onMount(connectWallet)
+
 </script>
 
 <Header />

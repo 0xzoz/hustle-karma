@@ -1,19 +1,19 @@
 <script>
 	import { page } from '$app/stores';
-	import logo from './svelte-logo.svg';
+	import logo from './karma-logo.jpg';
 </script>
 
 <header>
 	<div class="corner">
-		<a href="https://kit.svelte.dev">
-			<img src={logo} alt="SvelteKit" />
+		
+		<a href="/" class="logo-text">
+			<p class="logo">∞</p> Karma
+
 		</a>
 	</div>
 
 	<nav>
-		<svg viewBox="0 0 2 3" aria-hidden="true">
-			<path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
-		</svg>
+
 		<ul>
 			<li class:active={$page.url.pathname === '/'}><a sveltekit:prefetch href="/">Home</a></li>
 			<li class:active={$page.url.pathname === '/about'}>
@@ -23,9 +23,7 @@
 				<a sveltekit:prefetch href="/todos">Todos</a>
 			</li>
 		</ul>
-		<svg viewBox="0 0 2 3" aria-hidden="true">
-			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
-		</svg>
+
 	</nav>
 
 	<div class="corner">
@@ -37,11 +35,25 @@
 	header {
 		display: flex;
 		justify-content: space-between;
+		background:rgb(52, 50, 50);
+		width:100;
 	}
 
-	.corner {
-		width: 3em;
-		height: 3em;
+	a, u {
+ 	 text-decoration: none;
+	}
+
+	.logo {
+		font-size:6rem ;
+		line-height: 10%;
+		margin: 0;
+		color: rgb(188, 130, 243);
+		text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+
+	}
+
+	.logo-text {
+		font-size: 2rem
 	}
 
 	.corner a {
@@ -61,7 +73,6 @@
 	nav {
 		display: flex;
 		justify-content: center;
-		--background: rgba(255, 255, 255, 0.7);
 	}
 
 	svg {
@@ -109,7 +120,7 @@
 		height: 100%;
 		align-items: center;
 		padding: 0 1em;
-		color: var(--heading-color);
+		color: var(--accent-color);
 		font-weight: 700;
 		font-size: 0.8rem;
 		text-transform: uppercase;
@@ -119,6 +130,6 @@
 	}
 
 	a:hover {
-		color: var(--accent-color);
+		color: var(--heading-color);
 	}
 </style>
