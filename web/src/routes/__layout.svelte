@@ -1,4 +1,6 @@
 <script>
+	import { MaterialApp } from 'svelte-materialify';
+
 	import { onMount } from 'svelte';
 	import { Types, AptosClient } from 'aptos';
 	import Header from '$lib/header/Header.svelte';
@@ -18,42 +20,66 @@
 </script>
 
 <Header />
-
+<MaterialApp class="material-app">
 <main>
 	<slot />
 </main>
-
+</MaterialApp>
 <footer>
-	<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
+	<p>Web 3 Social Capital</p>
 </footer>
 
 <style>
+
+
 	main {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		padding: 1rem;
 		width: 100%;
-		max-width: 1024px;
+
 		margin: 0 auto;
+		height:90%;
+		min-height:90vh;
 		box-sizing: border-box;
+		font-family: 'Noto Serif JP', serif;
+			background-color: var(--primary-color);
+	background: linear-gradient(
+		180deg,
+		var(--primary-color) 0%,
+		var(--secondary-color) 10.45%,
+		var(--tertiary-color) 41.35%
+	);
 	}
+
+	body {
+	min-height: 100vh;
+	margin: 0;
+
+	}
+
+
 
 	footer {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		padding: 40px;
+		padding: 5px;
+		position: fixed;
+		bottom: 0;
+		width:100%;
 	}
 
 	footer a {
 		font-weight: bold;
+		font-family:roboto;
 	}
 
 	@media (min-width: 480px) {
 		footer {
-			padding: 40px 0;
+			padding: 5px 0;
 		}
 	}
 </style>

@@ -3,6 +3,14 @@
 	import { scale } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 
+	import {
+    DataTable,
+    DataTableHead,
+    DataTableRow,
+    DataTableCell,
+    DataTableBody,
+ 	 } from 'svelte-materialify';
+
 	/**
 	 * @typedef {{
 	 *   uid: string;
@@ -23,7 +31,29 @@
 </svelte:head>
 
 <div class="todos">
-	<h1>Todos</h1>
+	<h1>Pending Payments</h1>
+	<div class="d-flex justify-center">
+	<DataTable >
+		<DataTableHead>
+		  <DataTableRow>
+			<DataTableCell>Proposer</DataTableCell>
+			<DataTableCell numeric>Amount</DataTableCell>
+			<DataTableCell numeric>Epoch Due</DataTableCell>
+			<DataTableCell>Task</DataTableCell>
+		  </DataTableRow>
+		</DataTableHead>
+		<DataTableBody>
+		  <DataTableRow>
+			<DataTableCell>0x5htje...</DataTableCell>
+			<DataTableCell numeric>24</DataTableCell>
+			<DataTableCell numeric>4.0</DataTableCell>
+			<DataTableCell>Build Hustle Karma</DataTableCell>
+		  </DataTableRow>
+		 
+		</DataTableBody>
+		</DataTable>
+	</div>
+	<!-- <h1>Todos</h1>
 
 	<form
 		class="new"
@@ -76,7 +106,7 @@
 				<button class="delete" aria-label="Delete todo" disabled={todo.pending_delete} />
 			</form>
 		</div>
-	{/each}
+	{/each} -->
 </div>
 
 <style>
@@ -85,6 +115,7 @@
 		max-width: var(--column-width);
 		margin: var(--column-margin-top) auto 0 auto;
 		line-height: 1;
+		justify-content: center;
 	}
 
 	.new {

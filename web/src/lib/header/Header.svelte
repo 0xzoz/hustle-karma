@@ -1,50 +1,66 @@
 <script>
 	import { page } from '$app/stores';
 	import logo from './karma-logo.jpg';
+	import { Icon, Container, Row, Col } from 'svelte-materialify';
+	import { mdiGithub } from '@mdi/js';
 </script>
 
 <header>
+
+
+<Col >
 	<div class="corner">
 		
-		<a href="/" class="logo-text">
+		<a class:active={$page.url.pathname === '/'} href="/" class="logo-text">
 			<p class="logo">∞</p> Karma
 
 		</a>
 	</div>
+</Col>
+<Col >
 
 	<nav>
 
 		<ul>
-			<li class:active={$page.url.pathname === '/'}><a sveltekit:prefetch href="/">Home</a></li>
-			<li class:active={$page.url.pathname === '/about'}>
-				<a sveltekit:prefetch href="/about">About</a>
+			<li class:active={$page.url.pathname === '/claim'}>
+				<a sveltekit:prefetch href="/claim">Claim</a>
 			</li>
-			<li class:active={$page.url.pathname === '/todos'}>
-				<a sveltekit:prefetch href="/todos">Todos</a>
+			<li class:active={$page.url.pathname === '/verify'}>
+				<a sveltekit:prefetch href="/verify">Verify</a>
+			</li>
+			<li class:active={$page.url.pathname === '/rules'}>
+				<a sveltekit:prefetch href="/rules">Rules</a>
 			</li>
 		</ul>
 
 	</nav>
+</Col>
+<Col>
 
-	<div class="corner">
-		<!-- TODO put something else here? github link? -->
+	<div  class="code-link">
+		<a  class="github-icon" href="https://github.com/0xzoz/hustle-karma"><Icon size="32px" path={mdiGithub} /></a>>	
 	</div>
+</Col>
+
 </header>
 
 <style>
 	header {
-		display: flex;
+		font-family: 'Cinzel', serif;
+	    display: flex;
 		justify-content: space-between;
 		background:rgb(52, 50, 50);
 		width:100;
+		height:60px;
 	}
+
 
 	a, u {
  	 text-decoration: none;
 	}
 
 	.logo {
-		font-size:6rem ;
+		font-size:4rem ;
 		line-height: 10%;
 		margin: 0;
 		color: rgb(188, 130, 243);
@@ -53,16 +69,22 @@
 	}
 
 	.logo-text {
-		font-size: 2rem
+		font-size: 2rem;
+		color:white;
 	}
+
 
 	.corner a {
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: left;
 		width: 100%;
 		height: 100%;
+		padding-left:3%;
+
 	}
+
+
 
 	.corner img {
 		width: 2em;
@@ -91,8 +113,8 @@
 		margin: 0;
 		height: 3em;
 		display: flex;
-		justify-content: center;
-		align-items: center;
+		justify-content: right;
+		align-items: right;
 		list-style: none;
 		background: var(--background);
 		background-size: contain;
@@ -112,7 +134,7 @@
 		top: 0;
 		left: calc(50% - var(--size));
 		border: var(--size) solid transparent;
-		border-top: var(--size) solid var(--accent-color);
+		border-top: var(--size) solid var(--logo-color);
 	}
 
 	nav a {
@@ -130,6 +152,21 @@
 	}
 
 	a:hover {
-		color: var(--heading-color);
+		color: var(--logo-color);
 	}
+
+	.nav-grid {
+		align-items: left;
+	}
+	.nav-logo {
+		text-align: left;
+	}
+
+	.code-link {
+		justify-content: right;
+		text-align: right;
+	}
+
+
+	
 </style>
