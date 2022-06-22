@@ -128,6 +128,7 @@ address 0x1 {
 
     const BOND_VALUE_IS_NOT_CORRECT: u64 = 1;
     const PAYMENT_NOT_IN_PAYMENTS_TABLE = 2;
+    const KEY_DOES_NOT_EXIST = 3
 
 
     // gets initialized to a worker account when they submit a request for payment.
@@ -183,7 +184,7 @@ address 0x1 {
         assert(get_bond_value(_from_dao,_amount, _sender) > _bond, BOND_VALUE_IS_NOT_CORRECT);
 
         // push the payment onto the list
-        Vector::push_back<address>(&mut b.pending_payments,Payment  {
+        Vector::push_back(&mut b.pending_payments,Payment  {
           uid: b.max_uid + 1,
           worker: _sender,
           value: _amount,
@@ -228,6 +229,41 @@ address 0x1 {
       }
 
     }
+
+
+    ////////// WORKER PROFILE FUNCTIONS //////////
+
+
+    public fun add_detail(_sender: &signer, key: vector<u8>, value: vector<u8>) acquires Worker, Details {
+      let w = borrow_global_mut<Worker>(_sender);
+      Vector::push_back<Detail>(&w.details, Detail{
+        key: key,
+        value: value
+      })
+    }
+
+    public fun remove_detail(_sender: &signer, key: vector<u8>) acquires Worker, Details {
+      let w = borrow_global_mut<Worker>(_sender);
+      let (t,i) = get_index_by_key(Signer::address_of(_sender));
+      assert(!t, KEY_DOES_NOT_EXIST); 
+        if (t) {
+          Vector::remove<Detail>(&mut w.details, i);
+        }
+    }
+
+    public fun change_detail(_sender: &signer, key: vector<u8>, value: vector<u8>) acquires Worker, Details {
+      let w = borrow_global_mut<Worker>(_sender);
+      let (t,i) = get_index_by_key(Signer::address_of(_sender));
+      assert(!t, KEY_DOES_NOT_EXIST); 
+        if (t) {
+          Vector::remove<Detail>(&mut w.details, i);
+          let d = Vector::borrow<Payment>(&mut w.details, i);
+          d.value = value;
+        }
+ 
+    }
+
+
 
     ////////// SPONSOR FUNCTIONS //////////
 
@@ -336,18 +372,29 @@ address 0x1 {
 
     fun maybe_init_worker(_sender: &signer) {
       if (!exists<Worker>(Signer::address_of(_sender))) {
+        let new_details = init_details();
         move_to<Worker>(_sender, Worker {
           pending_value: 0,
           pending_bond: 0,
           cumulative_payment: 0,
+          details: new_details
         })
       }
     }
 
-    fun init_details(_sender: &signer) {
-      let details = Vector::empty<Detail>()
-      let accounts = Vector::empty<u64>
+    fun init_details(): Vector<Detail> acquires Detail{
+      //creates a details array for a worker
+      let details = Vector::empty<Detail>();
+      //initialized with some defaults Alias, github, twitter, discord
+      Vector::push_back(details,Detail {key: 'alias',value: Vector::empty<u64>()});
+      Vector::push_back(details,Detail {key: 'github',value: Vector::empty<u64>()});
+      Vector::push_back(details,Detail {key: 'twitter',value: Vector::empty<u64>()});
+      Vector::push_back(details,Detail {key: 'discord',value: Vector::empty<u64>()});
+
+      details
     }
+
+
 
     // removes an element from the list of payments, and returns in to scope.
     // need to add it back to the list
@@ -360,6 +407,23 @@ address 0x1 {
         let p = Vector::borrow<Payment>(&b.pending_payments, i);
 
         if (p.uid == _uid) return (true, i);
+
+        i = i + 1;
+      };
+      (false, 0)
+    }
+  }
+}
+
+    fun get_index_by_key(_worker: address, _key: Vector<u8>): (bool, u64) acquires Worker, Detail {
+      let w = borrow_global<Worker>(_worker);
+      let len = Vector::length<Detail>(&w.details);
+
+      let i = 0;
+      while (i < len) {
+        let d = Vector::borrow<Detail>(&w.details, i);
+
+        if (d.key == _key) return (true, i);
 
         i = i + 1;
       };
