@@ -1,8 +1,5 @@
 # Hustle Karma Community Fund
 
-
-[TOC]
-
 ## Overview
 
 **Problem:** We need to incentivize community growth while minimizing the friction
@@ -223,7 +220,59 @@ This is where the bulk of the work must be done. 0L currently does not have any 
 
 
 
-## Done
+## Contributing
+### Application
+
+(Production)[https://hustlekarma.xyz/]
+(Development)[https://dev.hustlekarma.xyz/]
+
+### How to contribute
+All contributions are welcome. Development happens on two branchs:
+
+* contract-work: This is for all smart contract work on the associated blockchain
+> While initially a Move based application, the goal is to have this implementation deployed on multiple chains in multiple languages.
+
+* frontend-work: All UI work can be added as PR to this branch.
+
+### Smart Contract Work
+
+* fork the repo and create a new branch. Make the name is specific to the work being completed.
+
+* Commits should be bundled containing similar changes and should be signed 
+
+* Changes should be submitted in a PR outlining the changes made
+
+#### 0L
+
+#### Deploy
+
+##### Testing 
+
+##### Upgrading
+
+#### Aptos
+
+#### Deploy
+
+##### Testing 
+
+##### Upgrading
+
+
+### Frontend Work
+
+* fork the repo and create a new branch. Make the name is specific to the work being completed.
+
+* Commits should be bundled containing similar changes and should be signed 
+
+* Changes should be submitted in a PR outlining the changes made
+
+
+
+
+## Work Completed
+
+> This will be added to a changelog with v 1.0.0
 
 - Implement pay_me logic - [commit](https://github.com/0xzoz/libra/commit/81985b34df6d70ff589236ac9fda5f6fe34126b7)
 - Implement release_all logic - [commit](https://github.com/0xzoz/libra/commit/2bcbeeb91fc0d72c3363c18a1e6ec3a4a2f35acf)
