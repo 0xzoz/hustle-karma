@@ -41,7 +41,7 @@
 // fraud, in material terms, and in psychological demotivation, while creating
 // an automated process, we might have a net increase in economic value.
 
-// The premise of Self Service Buffet is that fraud prevention for work is gated
+// The premise of Self Service Buffet is that fraud prevention for work is gated 
 // by the amount of people monitoring the game. The team which was working to
 // process the entire flow of payments before, can instead be a small committee,
 // that monitors for fraud (and this committee can obviously be expanded or
@@ -102,6 +102,7 @@
 
 //TODO: List
 // worker should have a way to determine each DAO's payments and bonding curves should factor this
+// Reciepts
 // NOT TAGGED: Add previous payments to a list -could be warrior or the DAO itself, maybe both
 // NOT TAGGED: Add point system to warrior
 // NOT TAGGED: Incorporate reporting standards proposed by BlockScience - https://hackmd.io/MKskCuXbQT2t9s8lou_GKQ?view
@@ -111,16 +112,18 @@
 //                                        - any more decreases the police funds - to create a tight nit group            
 // NOT TAGGED: Prevent rougue police - needs ideation
 // NOT TAGGED: Social recovery - needs ideation
+// NOT TAGGED: Payments need to be processed if they are not expediated by a police
 
 
 
 
-  module HustleKarma::Fund {
+  module HustleKarma::FundFactory {
     use Std::Vector;
     use Std::Signer;
     use Std::Block;
     use Std::Coin;
     use Std::ASCII;
+    
     const BOND_VALUE_IS_NOT_CORRECT: u64 = 1;
     const PAYMENT_NOT_IN_PAYMENTS_TABLE = 2;
 
@@ -160,6 +163,10 @@
       deliverable: ASCII::String,
       bond: u64, // NOTE: can't have the bond as the actual coin here, because this struct needs the 'drop' ability.
       rejection: vector<address>
+    }
+
+    struct Reciept has key {
+
     }
 
     ///////// WORKER FUNCTIONS ////////
@@ -372,7 +379,7 @@ module HustleKarma::Tests{
     use Std::Vector;
     use Std::Signer;
     
-    use HustleKarma::Fund;
+    use HustleKarma::FundFactory;
 
     const  FAKE_MESSAGE: vector<u8> = "Message";
 
@@ -380,23 +387,23 @@ module HustleKarma::Tests{
     #[test]
     public(script) fun test_init_dao(){
       let (alice, _) = create_two_signers();
-      Fund::init_dao(alice);
+      FundFactory::init_dao(alice);
     }
 
     #[test]
     public(script) fun test_fund_dao(){
       let (alice, bob) = create_two_signers();
-      Fund::init_dao(alice);
+      FundFactory::init_dao(alice);
       Std::Coin::mint<HustleKarma::Coin::Karma>(10);
       Std::Coin::deposit<HustleKarma::Coin::Karma>(Signer::address_of(&bob), 10);
-      Fund::fund_it(bob , Signer::address_of(&alice), 10);
+      FundFactory::fund_it(bob , Signer::address_of(&alice), 10);
     }
 
     #[test]
     public(script) fun test_create_police(){
       let (alice, bob) = create_two_signers();
-      Fund::init_dao(alice);
-      Fund::add_police(Signer::address_of(&alice), alice, Signer::address_of(&bob));
+      FundFactory::init_dao(alice);
+      FundFactory::add_police(Signer::address_of(&alice), alice, Signer::address_of(&bob));
       assert(is_police(Signer::address_of(&alice), Signer::address_of(&bob)), 1);
     }
 
@@ -404,10 +411,10 @@ module HustleKarma::Tests{
     #[test]
     public(script) fun test_remove_police(){
       let (alice, bob) = create_two_signers();
-      Fund::init_dao(alice);
-      Fund::add_police(Signer::address_of(&alice), alice, Signer::address_of(&bob));
+      FundFactory::init_dao(alice);
+      FundFactory::add_police(Signer::address_of(&alice), alice, Signer::address_of(&bob));
       assert(is_police(Signer::address_of(&alice), Signer::address_of(&bob)), 1);
-      Fund::remove_police(Signer::address_of(&alice), alice, Signer::address_of(&bob) );
+      FundFactory::remove_police(Signer::address_of(&alice), alice, Signer::address_of(&bob) );
       assert(!is_police(Signer::address_of(&alice), Signer::address_of(&bob)), 1);
     }
 
@@ -415,10 +422,10 @@ module HustleKarma::Tests{
     public(script) fun test_request_payment(){
       let (alice, bob) = create_two_signers();
       let (tom, carol) = create_two_signers();
-      Fund::init_dao(alice);
+      FundFactory::init_dao(alice);
       Std::Coin::mint<HustleKarma::Coin::Karma>(10);
       Std::Coin::deposit<HustleKarma::Coin::Karma>(Signer::address_of(&bob), 10);
-      Fund::fund_it(bob , Signer::address_of(&alice), 100000);
+      FundFactory::fund_it(bob , Signer::address_of(&alice), 100000);
 
       pay_me(tom, Signer::address_of(&alice), 50000, FAKE_MESSAGE, 10000);
 

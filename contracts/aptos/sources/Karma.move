@@ -13,7 +13,7 @@ module HustleKarma::Karma {
 
     /// Represents new user coin.
     /// Indeeed this type will be used as CoinType for your new coin.
-    struct Karma {}
+    struct Karma {} 
 
     /// The struct to store capability: mint and burn.
     struct Capability<CapType: store> has key {
