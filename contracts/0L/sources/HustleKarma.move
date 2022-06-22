@@ -102,7 +102,9 @@
 
 //TODO: List
 // worker should have a way to determine each DAO's payments and bonding curves should factor this
-// fund bob - how to fund an account in test 
+// MAYBE SOLVED --- fund bob - how to fund an account in test  --- Maybe Solution ---       Std::Diem::mint<GAS>(bob,100001)
+
+
 // NOT TAGGED: Add previous payments to a list -could be warrior or the DAO itself, maybe both
 // NOT TAGGED: Add point system to warrior
 // NOT TAGGED: Incorporate reporting standards proposed by BlockScience - https://hackmd.io/MKskCuXbQT2t9s8lou_GKQ?view
@@ -374,6 +376,7 @@ module 0x1::SefServiceBuffetTests{
     use Std::UnitTest; //dependant on latest diem version 
     use Std::Vector;
     use Std::Signer;
+    use Std::Diem;
     
     use 0x1::SelfService;
 
@@ -390,7 +393,7 @@ module 0x1::SefServiceBuffetTests{
     public(script) fun test_fund_dao(){
       let (alice, bob) = create_two_signers();
       SelfService::init_dao(alice);
-      //TODO: fund bob 
+      Std::Diem::mint<GAS>(bob,100001)
       fund_it(bob , Signer::address_of(&alice), 100000);
     }
 
@@ -418,7 +421,7 @@ module 0x1::SefServiceBuffetTests{
       let (alice, bob) = create_two_signers();
       let (tom, carol) = create_two_signers();
       SelfService::init_dao(alice);
-      //TODO: fund bob 
+      Std::Diem::mint<GAS>(bob,100001)
       fund_it(bob , Signer::address_of(&alice), 100000);
 
       pay_me(tom, Signer::address_of(&alice), 50000, FAKE_MESSAGE, 10000);
