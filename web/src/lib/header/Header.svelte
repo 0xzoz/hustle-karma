@@ -273,7 +273,7 @@
 
 	.navbar-list.mobile {
 		z-index: 1;
-		padding-top: 10%;
+		padding-top: 20%;
 		background-color: rgba(0, 0, 0, 0.8);
 		position: fixed;
 		display: block;
