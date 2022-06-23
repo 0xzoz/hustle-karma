@@ -1,10 +1,8 @@
 <script context="module" >
 	export const prerender = true;
+	import { Row, Col, MaterialApp } from 'svelte-materialify';
 </script>
 
-<script >
-	import Counter from '$lib/Counter.svelte';
-</script>
 
 <svelte:head>
 	<title>Home</title>
@@ -12,14 +10,20 @@
 </svelte:head>
 
 <section>
-	<h1>
-		<span class="text-1">
-			<p>work</p> <p><b>CAN</b></p> be chosen and permissionless
-		</span>
-		<span class="text-2">
-		<p>work</p> <p><b>SHOULD</b></p><p> be co-operative and honest</p>
-	    </span>
-	</h1>
+	<Row>
+		<h1 class="text-1">
+			<span >
+				<p>work</p> <p><b>CAN</b></p><p> be chosen and permissionless</p>
+			</span>
+		</h1>
+    </Row>	
+	<Row>
+		<h1 class="text-2">
+			<span >
+			<p>work</p> <p><b>SHOULD</b></p><p> be co-operative and honest</p>
+			</span>
+		</h1>
+    </Row>
 	<hr class="rounded">
 
 
@@ -32,6 +36,7 @@
 		flex-direction: column;
 		justify-content: center;
 		flex: 1;
+		margin: 5%
 	}
 	p {
 		margin:0;
@@ -47,7 +52,8 @@
 		width: 100%;
 		height: 0;
 		text-align:left;
-		padding-bottom:25%;
+		font-size: 4rem;
+
 	}
 
 	.text-2 {
@@ -56,7 +62,8 @@
 		width: 100%;
 		height: 0;
 		text-align:right;
-		padding-bottom:40%;
+		font-size: 4rem;
+
 	}
 
 	.welcome img {
@@ -70,7 +77,23 @@
 	hr.rounded {
 		border-top: 3px solid rgb(6, 6, 6);
 		border-radius: 5px;
-		width:90%;
+		width:100%;
 		position: relative;
 	}
+
+	@media (max-width: 600px) {
+
+
+	p {
+		
+	}
+
+	.text-1 {
+		font-size: 2rem;
+	}
+
+	.text-2 {
+		font-size: 2rem;
+	}
+}
 </style>
