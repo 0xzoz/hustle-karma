@@ -5,8 +5,8 @@
 
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>Hustle Karma</title>
+	<meta name="description" content="Pay Me" />
 </svelte:head>
 
 <section>

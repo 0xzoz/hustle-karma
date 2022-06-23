@@ -219,6 +219,14 @@
 		opacity: 1;
 	}
 
+	h1 {
+			font-size: 2rem;
+		}
+
+	h2 {
+		font-size: 1.2rem;
+	}
+
 	@media only screen and (max-width: 500px) {
 		h1 {
 			font-size: 2rem;
