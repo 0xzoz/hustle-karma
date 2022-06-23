@@ -1,12 +1,13 @@
 <script>
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import logo from './karma-logo.jpg';
 	import { Icon, Col } from 'svelte-materialify';
 	import { mdiGithub } from '@mdi/js';
-	import { onMount } from "svelte";
 
 	// Show mobile icon and display menu
 	let showMobileMenu = false;
+	let showGithub = true;
 
 	const handleMobileIconClick = () => (showMobileMenu = !showMobileMenu);
 
@@ -19,6 +20,12 @@
 		showMobileMenu = false;
 	}
 	};
+
+	onMount(async () => {
+		if (window.innerWidth < 500){
+			showGithub = false;
+		}
+	});
 </script>
 
 <header>
@@ -60,11 +67,13 @@
 	</div>
 	</nav>
 </Col>
+{#if showGithub}
 <Col>
 		<div  class={`code-link${showMobileMenu ? ' mobile' : ''}`}>
 			<a  class="github-icon" href="https://github.com/0xzoz/hustle-karma"><Icon size="32px" path={mdiGithub} /></a>>	
 		</div>
 </Col>
+{/if}
 
 </header>
 
@@ -120,6 +129,7 @@
 		display: flex;
 		justify-content: center;
 		height: 45px;
+		
 	}
 
 	svg {
@@ -191,6 +201,7 @@
 		display: flex;
 		align-items: center;
 		height: 100%;
+		
     }
 
 	.mobile-icon {
@@ -262,6 +273,7 @@
 
 	.navbar-list.mobile {
 		z-index: 1;
+		padding-top: 10%;
 		background-color: rgba(0, 0, 0, 0.8);
 		position: fixed;
 		display: block;
