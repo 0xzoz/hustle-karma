@@ -4,100 +4,6 @@
 // Error code: 
 /////////////////////////////////////////////////////////////////////////
 
-// TL;DR the guarantee that Self Service Buffet offers is: workers pay
-// themselves, and rampant abuse is minimized. But not all abuse. We assume
-// honesty. By default Workers will be paid some days after a request is made,
-// without intervention. Some attacks are possible, and that's explicitly ok,
-// because 100% coverage is impossible. Plus, importantly, this cannot be worse
-// than the amount of free-riding that happens with proof-of-work mining
-// rewards, which is the vast majority of participants. So the minimal controls
-// the contract has is to make it unprofitable to try to amplify attacks, by
-// using time delays and bonds bonding for each new pending payment in the
-// system.
-
-// Games need to have an equilibrium. In any community the honest actors always
-// pay for the actions of bad actors. There's both monetary cost and demotivation,
-// which together can push the game out of balance. Fraud in games is not always
-// obvious to identify, but equally important, it's not necessarily something
-// that should be eliminated entirely. There's an adage in payment processing:
-// "the only way to remove fraudulent transactions is to also remove the
-// revenue".
-
-// Self Service Buffet is a payment processing game for DAOs which optimizes for
-// revenue, not for fraud prevention.
-
-// DAO payments have mirrored the practices of companies: deliver work, send
-// a report, then an invoice, getting invoice approved, and later finding the
-// funds, and authorizing transactions. This has a feeling of safety. It is
-// process oriented, and appears more orderly. But it leaves money on the table
-// for both the workers and for the protocols.
-
-// The greatest cost in such a system is opportunity cost. How much work is the
-// DAO failing to get done, because it is optimizing for minimal fraud?
-// Free-mining proof-of-work bring a lot of free-riders to your platform. Would
-// self-service payments really be worse than free-mining?
-
-// Obviously fraud can't be ignored.  But if we can limit the damage of the
-// fraud, in material terms, and in psychological demotivation, while creating
-// an automated process, we might have a net increase in economic value.
-
-// The premise of Self Service Buffet is that fraud prevention for work is gated
-// by the amount of people monitoring the game. The team which was working to
-// process the entire flow of payments before, can instead be a small committee,
-// that monitors for fraud (and this committee can obviously be expanded or
-// reduced algorithmically, but that's not a concern here)
-
-// PRODUCT REQUIREMENTS:
-
-// Least viable process. Every human in the loop slows down the payments. We
-// need to make it rain on DAO contributors.
-
-// Optimize for Net Payments. A few attacks is fine, if there is a net gain in
-// productivity. But repeated attacks on scale should not be profitable.
-
-// Distraction of the fraud monitoring team can be attacked, the policies should
-// prevent monitors from getting overwhelmed.
-
-// Expensive griefing: if just for fun someone spams requests so to prevent good
-// actors from getting paid, the cost should increase until it is prohibitive.
-
-// Don't rely on reputation. Reputation is high maintenance, and everyone
-// monitoring reputation increases friction.
-
-
-// MECHANISM:
-
-// Each payment request has a Credit Limit, a maximum amount which can be
-// disbursed. Note: credit limits are not per account, there is no reputation.
-
-// Anyone can request multiple payments to circumvent Credit Limit. Thus
-// requesting payments has a cost. The cost is time and a bond. 
-
-// The costs increase as a function of two variables: 1) count of pending
-// payments and 2) the value of pending payments.
-
-// As long as there are few payments in the network of
-// low value, the Police have easy work and there's no reason to add friction to
-// payments. When there are many requests, the Police willn need more time to sift
-// through the payments, this delay can be done algorithmically.
-
-// And after a certain amount of pending payments (by value) reaches a threshold,
-// a bond must also be placed to prevent spam. 
-
-// The floor can be very low, for low friction. Until there are 10 pending
-// payments, the Delay is 3 epochs (days), and the Bond is 0.
-
-// Rejected payments forfeit the bond. The bond is forfeited and goes into the
-// funding pool. Thus griefing attacks (submitting spam requests to slow down
-// payments for honest actors) will require increasing amounts of bonds.
-
-
-// The expected effect is: In the ordinary course of events, with few payments
-// below a value threshold, people get paid without fuss. When many request for
-// payment come through (legitimally or in an attempt to attack the system),
-// everyone needs to wait a bit longer, and risk paying to get money. For
-// attackers it should quickly become less fun, and or profitable. And the
-// prospect of it being a waste of time, might prevent it in the first place
 
 
 //TODO: List
@@ -137,7 +43,7 @@ address 0x1 {
       pending_bond: u64,
       cumulative_payment: u64,
       details: vector<Detail>,
-      payments: vector<Payment>
+      receipts: vector<Receipt>
     }
 
     // allow a Worker to tag themselves
@@ -155,6 +61,7 @@ address 0x1 {
       police_list: vector<address>,
       pending_payments: vector<Payment>,
       max_uid: u64,
+      receipts: vector<Receipt>
     }
 
     struct Payment has key, store, drop {
@@ -165,6 +72,18 @@ address 0x1 {
       epoch_due: u64,
       deliverable: vector<u8>,
       bond: u64, // NOTE: can't have the bond as the actual coin here, because this struct needs the 'drop' ability.
+      rejection: vector<address>
+    }
+
+    struct Receipt has copy, store {
+      dao_address: address,
+      uid: u64,
+      worker: address,
+      value: u64,
+      epoch_requested: u64,
+      epoch_due: u64,
+      deliverable: vector<u8>,
+      bond: u64, 
       rejection: vector<address>
     }
 
@@ -289,6 +208,7 @@ address 0x1 {
         police_list: Vector::empty<address>(),
         pending_payments: Vector::empty<Payment>(),
         max_uid: 0,
+        receipts: Vector::empty<Receipt>(),
       };
       move_to<Buffet>(_sender, new_buffet)
     }
@@ -360,6 +280,24 @@ address 0x1 {
         DiemAccount:withdraw_from_balance<GAS>(_dao_addr, p.worker, b.bond, p.bond);
       };
 
+      //record payment information to a receipt.
+      let r = Receipt{
+              dao_address: _dao_addr,
+              uid: p.uid,
+              worker: p.worker,
+              value: p.value,
+              epoch_requested: p.epoch_requested,
+              epoch_due: p.epoch_due,
+              deliverable: p.deliverable,
+              bond: p.bond, 
+              rejection: p.rejection
+              } 
+        
+        let w = borrow_global_mut<Worker>(p.worker);
+        Vector::push_pack<Receipt>(w.receipts, copy r)
+        Vector::push_pack<Receipt>(b.receipts, r)
+
+
       // remove the element from vector if successful.
       let _ = Vector::remove<Payment>(&mut b.pending_payments, i);
 
@@ -377,7 +315,8 @@ address 0x1 {
           pending_value: 0,
           pending_bond: 0,
           cumulative_payment: 0,
-          details: new_details
+          details: new_details,
+          receipts: Vector::empty<Receipt>(),
         })
       }
     }
@@ -386,10 +325,10 @@ address 0x1 {
       //creates a details array for a worker
       let details = Vector::empty<Detail>();
       //initialized with some defaults Alias, github, twitter, discord
-      Vector::push_back(details,Detail {key: 'alias',value: Vector::empty<u64>()});
-      Vector::push_back(details,Detail {key: 'github',value: Vector::empty<u64>()});
-      Vector::push_back(details,Detail {key: 'twitter',value: Vector::empty<u64>()});
-      Vector::push_back(details,Detail {key: 'discord',value: Vector::empty<u64>()});
+      Vector::push_back<Detail>(details,Detail {key: 'alias',value: Vector::empty<u64>()});
+      Vector::push_back<Detail>(details,Detail {key: 'github',value: Vector::empty<u64>()});
+      Vector::push_back<Detail>(details,Detail {key: 'twitter',value: Vector::empty<u64>()});
+      Vector::push_back<Detail>(details,Detail {key: 'discord',value: Vector::empty<u64>()});
 
       details
     }
