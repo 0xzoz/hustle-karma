@@ -218,4 +218,12 @@
 		transition: opacity 0.2s;
 		opacity: 1;
 	}
+
+	@media only screen and (max-width: 500px) {
+		h1 {
+			font-size: 2rem;
+		}
+   }
+
+
 </style>
